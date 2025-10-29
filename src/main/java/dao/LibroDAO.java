@@ -127,4 +127,51 @@ public class LibroDAO {
         return "Libro eliminado correctamente";
     }
 
+    public int insertarLibro(Libro libro) {
+        String sql = "CALL sp_insert_libro(?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexionBD.getConnection(); CallableStatement stmt = conn.prepareCall(sql)) {
+
+            stmt.setString(1, libro.getTitulo());
+            stmt.setString(2, libro.getIsbn());
+            stmt.setInt(3, libro.getAño());
+            stmt.setInt(4, libro.getCategoria().getIdCategoria());
+            stmt.setInt(5, libro.getAutor().getIdAutor());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_libro_insertado");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Error en LibroDAO.insertarLibro: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+    
+    public boolean actualizarLibro(Libro libro) {
+    String sql = "CALL sp_update_libro(?, ?, ?, ?, ?, ?)";
+    
+    try (Connection conn = ConexionBD.getConnection();
+         CallableStatement stmt = conn.prepareCall(sql)) {
+        
+        stmt.setInt(1, libro.getIdLibro());
+        stmt.setString(2, libro.getTitulo());
+        stmt.setString(3, libro.getIsbn());
+        stmt.setInt(4, libro.getAño());
+        stmt.setInt(5, libro.getCategoria().getIdCategoria());
+        stmt.setInt(6, libro.getAutor().getIdAutor());
+        
+        int filasAfectadas = stmt.executeUpdate();
+        return filasAfectadas > 0;
+        
+    } catch (SQLException e) {
+        System.out.println("Error en LibroDAO.actualizarLibro: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    }
+}
 }
