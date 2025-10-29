@@ -83,5 +83,58 @@ public class BibliotecaService {
         }
     }
 
+    @POST
+    @Path("/crearLibros")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response crearLibro(Libro libro) {
+        try {
+            System.out.println("Creando libro: " + libro.getTitulo());
+
+            int idGenerado = libroDAO.insertarLibro(libro);
+
+            if (idGenerado == -1) {
+                return Response.status(500).entity("Error al crear el libro").build();
+            }
+
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("mensaje", "Libro creado exitosamente");
+            respuesta.put("id_libro", idGenerado);
+            respuesta.put("titulo", libro.getTitulo());
+
+            return Response.status(201).entity(respuesta).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error creando libro: " + e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/libros/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response actualizarLibro(@PathParam("id") int idLibro, Libro libro) {
+        try {
+            System.out.println("✏️ Actualizando libro ID: " + idLibro);
+
+            // Asignar el ID de la URL al libro
+            libro.setIdLibro(idLibro);
+
+            boolean actualizado = libroDAO.actualizarLibro(libro);
+
+            if (!actualizado) {
+                return Response.status(404).entity("Libro no encontrado").build();
+            }
+
+            Map<String, String> respuesta = new HashMap<>();
+            respuesta.put("mensaje", "Libro actualizado exitosamente");
+            respuesta.put("id_libro", String.valueOf(idLibro));
+            respuesta.put("titulo", libro.getTitulo());
+
+            return Response.ok(respuesta).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error actualizando libro: " + e.getMessage()).build();
+        }
+    }
+
     //ultima linea
 }
