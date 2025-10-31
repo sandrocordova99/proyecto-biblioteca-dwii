@@ -2,9 +2,13 @@ package services;
 
 import dao.LibroDAO;
 import Entidades.Libro;
+import dao.PrestamoDAO;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.StringReader;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,5 +140,61 @@ public class BibliotecaService {
         }
     }
 
+    /* ---------------------------- PRESTAMOS ---------------------------- */
+    @POST
+    @Path("/prestamos")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response prestarLibro(String jsonRequest) {
+        try {
+            // Parsear JSON manualmente (por si no funciona la deserialización automática)
+            JsonObject jsonObject = Json.createReader(new StringReader(jsonRequest)).readObject();
+            int idLibro = jsonObject.getInt("idLibro");
+            int idUsuario = jsonObject.getInt("idUsuario");
+
+            System.out.println(" Prestando libro ID: " + idLibro + " a usuario ID: " + idUsuario);
+
+            PrestamoDAO prestamoDAO = new PrestamoDAO();
+            String resultado = prestamoDAO.prestarLibro(idLibro, idUsuario);
+
+            if (resultado.startsWith("ERROR")) {
+                return Response.status(400).entity(resultado).build();
+            }
+
+            Map<String, String> respuesta = new HashMap<>();
+            respuesta.put("mensaje", resultado);
+            respuesta.put("id_libro", String.valueOf(idLibro));
+            respuesta.put("id_usuario", String.valueOf(idUsuario));
+
+            return Response.status(201).entity(respuesta).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error en préstamo: " + e.getMessage()).build();
+        }
+    }
+
+    @POST
+    @Path("/prestamos/{id}/devolver")
+    public Response devolverLibro(@PathParam("id") int idPrestamo) {
+        try {
+            System.out.println(" Devolviendo préstamo ID: " + idPrestamo);
+
+            PrestamoDAO prestamoDAO = new PrestamoDAO();
+            String resultado = prestamoDAO.devolverLibro(idPrestamo);
+
+            if (resultado.startsWith("ERROR")) {
+                return Response.status(400).entity(resultado).build();
+            }
+
+            Map<String, String> respuesta = new HashMap<>();
+            respuesta.put("mensaje", resultado);
+            respuesta.put("id_prestamo", String.valueOf(idPrestamo));
+
+            return Response.ok(respuesta).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error en devolución: " + e.getMessage()).build();
+        }
+    }
+    
     //ultima linea
 }
