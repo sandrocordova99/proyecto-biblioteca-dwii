@@ -1,3 +1,4 @@
+
 package services;
 
 import dao.UsuarioDAO;
@@ -78,7 +79,6 @@ public class UsuarioService {
             System.out.println("Error en búsqueda: " + e.getMessage());
             return Response.status(500).entity("Error en búsqueda: " + e.getMessage()).build();
         }
-
     }
-    
 }
+    
