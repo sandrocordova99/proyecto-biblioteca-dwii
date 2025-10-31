@@ -15,6 +15,7 @@ Entidades\Prestamo.class
 Entidades\Categoria.class
 dao\CategoriaDAO.class
 utils\ConexionBD.class
+services\UsuarioService.class
 dao\UsuarioDAO.class
 com\cibertec\proyectodwii\JakartaRestConfiguration.class
 dao\PrestamoDAO.class
