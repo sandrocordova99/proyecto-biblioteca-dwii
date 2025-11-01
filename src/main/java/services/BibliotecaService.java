@@ -1,7 +1,12 @@
 package services;
 
+import Entidades.Autor;
+import Entidades.Categoria;
 import dao.LibroDAO;
+import dao.CategoriaDAO;
 import Entidades.Libro;
+import Entidades.Prestamo;
+import dao.AutorDAO;
 import dao.PrestamoDAO;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -25,7 +30,6 @@ public class BibliotecaService {
         try {
             List<Libro> libros = libroDAO.listarLibrosCompletos();
 
-            System.out.println(" Libros desde DAO: " + libros.size());
             for (Libro libro : libros) {
                 System.out.println(" - " + libro.getTitulo() + " | Categoría: "
                         + (libro.getCategoria() != null ? libro.getCategoria().getNombre() : "null"));
@@ -44,7 +48,6 @@ public class BibliotecaService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response buscarLibros(@QueryParam("q") String busqueda) {
         try {
-            System.out.println("Buscando libros: " + busqueda);
 
             List<Libro> libros = libroDAO.buscarLibros(busqueda);
 
@@ -53,7 +56,6 @@ public class BibliotecaService {
             return Response.ok(libros).build();
 
         } catch (Exception e) {
-            System.out.println("Error en búsqueda: " + e.getMessage());
             return Response.status(500).entity("Error en búsqueda: " + e.getMessage()).build();
         }
 
@@ -63,7 +65,6 @@ public class BibliotecaService {
     @Path("/hola")
     @Produces(MediaType.APPLICATION_JSON)
     public Response hola() {
-        System.out.println(" ENDPOINT /hola LLAMADO");
 
         Map<String, String> response = new HashMap<>();
         response.put("mensaje", "Hola mundo desde REST!");
@@ -76,7 +77,6 @@ public class BibliotecaService {
     @Path("/libros/{id}")
     public Response eliminarLibro(@PathParam("id") int idLibro) {
         try {
-            System.out.println("Eliminando libro ID: " + idLibro);
             String resultado = libroDAO.eliminarLibro(idLibro);
             if (resultado.startsWith("ERROR")) {
                 return Response.status(400).entity(resultado).build();
@@ -92,7 +92,6 @@ public class BibliotecaService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response crearLibro(Libro libro) {
         try {
-            System.out.println("Creando libro: " + libro.getTitulo());
 
             int idGenerado = libroDAO.insertarLibro(libro);
 
@@ -117,9 +116,7 @@ public class BibliotecaService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response actualizarLibro(@PathParam("id") int idLibro, Libro libro) {
         try {
-            System.out.println("✏️ Actualizando libro ID: " + idLibro);
 
-            // Asignar el ID de la URL al libro
             libro.setIdLibro(idLibro);
 
             boolean actualizado = libroDAO.actualizarLibro(libro);
@@ -146,7 +143,6 @@ public class BibliotecaService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response prestarLibro(String jsonRequest) {
         try {
-            // Parsear JSON manualmente (por si no funciona la deserialización automática)
             JsonObject jsonObject = Json.createReader(new StringReader(jsonRequest)).readObject();
             int idLibro = jsonObject.getInt("idLibro");
             int idUsuario = jsonObject.getInt("idUsuario");
@@ -176,7 +172,6 @@ public class BibliotecaService {
     @Path("/prestamos/{id}/devolver")
     public Response devolverLibro(@PathParam("id") int idPrestamo) {
         try {
-            System.out.println(" Devolviendo préstamo ID: " + idPrestamo);
 
             PrestamoDAO prestamoDAO = new PrestamoDAO();
             String resultado = prestamoDAO.devolverLibro(idPrestamo);
@@ -195,11 +190,69 @@ public class BibliotecaService {
             return Response.status(500).entity("Error en devolución: " + e.getMessage()).build();
         }
     }
-    
-    
-    
-    
-    
-    
+
+    @GET
+    @Path("/prestamos/activos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPrestamosActivos() {
+        try {
+
+            PrestamoDAO prestamoDAO = new PrestamoDAO();
+            List<Prestamo> prestamos = prestamoDAO.getPrestamosActivos();
+
+            return Response.ok(prestamos).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/usuarios/{id}/historial")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHistorialUsuario(@PathParam("id") int idUsuario) {
+        try {
+
+            PrestamoDAO prestamoDAO = new PrestamoDAO();
+            List<Prestamo> historial = prestamoDAO.getHistorialUsuario(idUsuario);
+
+            return Response.ok(historial).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
+    /* ---------------------------- CATEGORIA ---------------------------- */
+    @GET
+    @Path("/categorias")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCategorias() {
+        try {
+
+            CategoriaDAO categoriaDAO = new CategoriaDAO();
+            List<Categoria> categorias = categoriaDAO.getCategorias();
+
+            return Response.ok(categorias).build();
+
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
+    /* ---------------------------- CATEGORIA ---------------------------- */
+    @GET
+    @Path("/autores")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAutores() {
+        try {
+            AutorDAO autorDAO = new AutorDAO();
+            List<Autor> autores = autorDAO.getAutores();
+            return Response.ok(autores).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
     //ultima linea
 }
