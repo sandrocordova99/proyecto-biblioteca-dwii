@@ -42,8 +42,7 @@ public class UsuarioService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response crearUsuario(Usuario usuario) {
         try {
-            System.out.println("Creando usuario: " + usuario.getNombre());
-
+ 
             int idGenerado = UsuarioDAO.insertarUsuario(usuario);
 
             if (idGenerado == -1) {
@@ -67,17 +66,14 @@ public class UsuarioService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response buscarUsuarios(@QueryParam("q") String busqueda) {
         try {
-            System.out.println("Buscando usuarios: " + busqueda);
-
+ 
             List<Usuario> usuarios = UsuarioDAO.buscarUsuarios(busqueda);
 
-            System.out.println("Resultados: " + usuarios.size() + " usuarios");
-
+ 
             return Response.ok(usuarios).build();
 
         } catch (Exception e) {
-            System.out.println("Error en búsqueda: " + e.getMessage());
-            return Response.status(500).entity("Error en búsqueda: " + e.getMessage()).build();
+             return Response.status(500).entity("Error en búsqueda: " + e.getMessage()).build();
         }
     }
 }

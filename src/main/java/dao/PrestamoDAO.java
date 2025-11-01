@@ -4,10 +4,18 @@
  */
 package dao;
 
+import Entidades.Autor;
+import Entidades.Categoria;
+import Entidades.Libro;
+import Entidades.Prestamo;
+import Entidades.Usuario;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import utils.ConexionBD;
 
 /**
@@ -71,5 +79,98 @@ public class PrestamoDAO {
         return "Libro devuelto correctamente";
     }
 
-    //ultima parte 
+    public List<Prestamo> getPrestamosActivos() {
+        List<Prestamo> prestamos = new ArrayList<>();
+
+        try (Connection conn = ConexionBD.getConnection(); CallableStatement stmt = conn.prepareCall("CALL sp_get_prestamos_activos()"); ResultSet rs = stmt.executeQuery()) {
+
+            // Ver metadatos del ResultSet
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            int rowCount = 0;
+            while (rs.next()) {
+                rowCount++;
+
+                // Mapeo básico
+                Prestamo prestamo = new Prestamo();
+                prestamo.setIdPrestamo(rs.getInt("id_prestamo"));
+                prestamo.setFechaPrestamo(rs.getDate("fecha_prestamo"));
+                prestamo.setEstado(rs.getString("estado"));
+
+                Libro libro = new Libro();
+                libro.setIdLibro(rs.getInt("id_libro"));
+                libro.setTitulo(rs.getString("libro"));
+                prestamo.setLibro(libro);
+
+                Usuario usuario = new Usuario();
+                usuario.setIdUsuario(rs.getInt("id_usuario"));
+                usuario.setNombre(rs.getString("usuario"));
+                prestamo.setUsuario(usuario);
+
+                prestamos.add(prestamo);
+            }
+
+        } catch (SQLException e) {
+            System.out.println(" Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return prestamos;
+    }
+
+    public List<Prestamo> getHistorialUsuario(int idUsuario) {
+        List<Prestamo> prestamos = new ArrayList<>();
+
+        String sql = "CALL sp_get_historial_usuario(?)";
+
+        try (Connection conn = ConexionBD.getConnection(); CallableStatement stmt = conn.prepareCall(sql)) {
+
+            stmt.setInt(1, idUsuario);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+ 
+                int count = 0;
+                while (rs.next()) {
+                    count++;
+                    System.out.println("Préstamo " + count + ":");
+                    System.out.println("   ID: " + rs.getInt("id_prestamo"));
+                    System.out.println("   Libro: " + rs.getString("libro"));
+                    System.out.println("   Estado: " + rs.getString("estado"));
+
+                    Prestamo prestamo = new Prestamo();
+                    prestamo.setIdPrestamo(rs.getInt("id_prestamo"));
+                    prestamo.setFechaPrestamo(rs.getDate("fecha_prestamo"));
+                    prestamo.setFechaDevolucion(rs.getDate("fecha_devolucion"));
+                    prestamo.setEstado(rs.getString("estado"));
+
+                     Libro libro = new Libro();
+                    libro.setTitulo(rs.getString("libro"));   
+                    libro.setIsbn(rs.getString("isbn"));
+
+                     Autor autor = new Autor();
+                    autor.setNombre(rs.getString("autor"));   
+                    libro.setAutor(autor);
+
+                     Categoria categoria = new Categoria();
+                    categoria.setNombre(rs.getString("categoria"));   
+                    libro.setCategoria(categoria);
+
+                    prestamo.setLibro(libro);
+
+                    prestamos.add(prestamo);
+                }
+
+                System.out.println("Total en historial: " + count);
+            }
+
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+
+        return prestamos;
+    }
+
+//ultima parte 
 }

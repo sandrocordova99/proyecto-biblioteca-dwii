@@ -48,15 +48,13 @@ public class LibroDAO {
                 autor.setNacionalidad(rs.getString("nacionalidad"));
                 libro.setAutor(autor);
 
-                // Asignar imagen portada
-                libro.setImagenPortada(rs.getString("imagen_portada"));
+                 libro.setImagenPortada(rs.getString("imagen_portada"));
 
                 libros.add(libro);
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error en LibroDAO.listarLibrosCompletos: " + e.getMessage());
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
         return libros;
@@ -96,8 +94,7 @@ public class LibroDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(" Error en LibroDAO.buscarLibros: " + e.getMessage());
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
         return libros;
@@ -117,8 +114,7 @@ public class LibroDAO {
             }
 
         } catch (SQLException e) {
-            // Capturar el error personalizado del SP
-            if (e.getMessage().contains("préstamos activos")) {
+             if (e.getMessage().contains("préstamos activos")) {
                 return "ERROR: No se puede eliminar, el libro tiene préstamos activos";
             }
             return "ERROR: " + e.getMessage();
@@ -145,8 +141,7 @@ public class LibroDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error en LibroDAO.insertarLibro: " + e.getMessage());
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
         return -1;
@@ -169,8 +164,7 @@ public class LibroDAO {
         return filasAfectadas > 0;
         
     } catch (SQLException e) {
-        System.out.println("Error en LibroDAO.actualizarLibro: " + e.getMessage());
-        e.printStackTrace();
+         e.printStackTrace();
         return false;
     }
     }

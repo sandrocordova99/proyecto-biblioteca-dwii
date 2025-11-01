@@ -38,14 +38,12 @@ public class UsuarioDAO {
         }
 
     } catch (SQLException e) {
-        System.out.println("❌ Error en UsuarioDAO.listarUsuarios: " + e.getMessage());
-        e.printStackTrace();
+         e.printStackTrace();
     }
 
     return usuarios;
     }
 
-    
     public List<Usuario> buscarUsuarios(String busqueda) {
         List<Usuario> usuarios = new ArrayList<>();
 
@@ -72,8 +70,7 @@ public class UsuarioDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(" Error en UsuarioDAO.buscarUsuarios: " + e.getMessage());
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
         return usuarios;
@@ -95,8 +92,7 @@ public class UsuarioDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error en UsuarioDAO.insertarUsuario: " + e.getMessage());
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
         return -1;
