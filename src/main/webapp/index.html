@@ -1,10 +1,69 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Start Page</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
-</html>
+<!DOCTYPE html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Libros REST</title>
+    <script src="https://cdn.tailwindcss.com"></script><style>th,td{padding:8px;text-align:left}</style>
+</head>
+<body class="p-4 bg-gray-100 font-sans">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-2xl font-bold mb-4 text-center">Listado de Libros</h1>
+        <div id="status" class="mb-3 p-2 text-sm text-center hidden rounded"></div>
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-semibold">Catálogo (<span id="count">0</span>)</h2>
+            <button onclick="listar()" class="px-3 py-1 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600">Actualizar</button>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 text-xs font-medium text-gray-500 uppercase">
+                <tr><th>ID</th><th>Título/Autor</th><th>Categoría</th><th>Del</th></tr>
+            </thead>
+            <tbody id="list" class="divide-y divide-gray-200"><tr><td colspan="4" class="text-center py-3">Cargando...</td></tr></tbody>
+        </table>
+    </div>
+    <script>
+        // 1. Configuración y Referencias
+        const BASE_URL='http://localhost:8080/PROYECTODWII/api/biblioteca'; 
+        const list=document.getElementById('list'),status=document.getElementById('status'),count=document.getElementById('count');
+
+        // 2. Mostrar Estado
+        const showStatus=(msg,isErr=false)=>{
+            status.textContent=msg; 
+            status.className=`mb-3 p-2 text-sm text-center rounded \${isErr?'bg-red-100 text-red-700':'bg-green-100 text-green-700'}`;
+            setTimeout(()=>status.classList.add('hidden'),5000);
+        };
+
+        // 3. Renderizar Libros
+        const render=(libros)=>{
+            list.innerHTML='';count.textContent=libros.length;
+            if(libros.length===0){list.innerHTML='<tr><td colspan="4" class="text-center py-3 text-gray-500">No hay libros.</td></tr>';return;}
+            libros.forEach(l=>{
+                const cat=l.categoria?l.categoria.nombre:'General';
+                list.innerHTML+=`<tr class="hover:bg-gray-50"><td class="p-2">${l.idLibro}</td><td class="p-2"><div class="font-semibold">${l.titulo}</div><div class="text-xs text-gray-500">${l.autor}</div></td><td class="p-2 text-center text-xs bg-indigo-50 rounded">${cat}</td><td class="p-2 text-center"><button onclick="del(${l.idLibro},'${l.titulo}')" class="text-red-500 hover:text-red-700">X</button></td></tr>`;
+            });
+        };
+
+        // 4. Listar Libros (GET)
+        async function listar(){
+            try{
+                list.innerHTML='<tr><td colspan="4" class="text-center py-3 text-gray-500">Cargando...</td></tr>';
+                const res=await fetch(`${BASE_URL}/libros`);
+                if(!res.ok) throw new Error(`HTTP ${res.status}`);
+                render(await res.json());
+            }catch(e){
+                console.error("Error:",e);list.innerHTML='<tr><td colspan="4" class="text-center py-3 text-red-500">⚠️ Error de conexión</td></tr>';showStatus('Error al conectar con el servicio REST.',true);
+            }
+        }
+
+        // 5. Eliminar Libro (DELETE)
+        async function del(id,title){
+            if(!confirm(`¿Eliminar "${title}" (ID: ${id})?`)) return;
+            try{
+                const res=await fetch(`${BASE_URL}/libros/${id}`,{method:'DELETE'});
+                const data=await res.text();
+                if(!res.ok) throw new Error(`Error: ${data}`);
+                showStatus(`Libro eliminado: ${data}`);listar();
+            }catch(e){
+                console.error("Error al eliminar:",e);showStatus('Error al eliminar: '+e.message,true);
+            }
+        }
+        
+        window.onload=listar;
+    </script>
+</body></html>
